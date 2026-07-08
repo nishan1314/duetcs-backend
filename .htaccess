@@ -1,0 +1,15 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# CORS headers are now handled in individual PHP files
+# Removed from .htaccess to avoid conflicts
+
+# Enable error reporting for development (disable in production)
+php_flag display_errors On
+php_flag display_startup_errors On
+php_value error_reporting E_ALL
+
+# Security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-XSS-Protection "1; mode=block"

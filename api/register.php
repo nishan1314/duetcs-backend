@@ -13,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $conn = getDBConnection();
 if ($conn) {
     $settingResult = $conn->query("SELECT setting_value FROM site_settings WHERE setting_key = 'enable_registration' LIMIT 1");
-    if ($settingResult && $settingResult->rowCount() > 0) {
-        $row = $settingResult->fetch(PDO::FETCH_ASSOC);
+    if ($settingResult && $settingResult->num_rows > 0) {
+        $row = $settingResult->fetch_assoc();
         if ($row['setting_value'] !== 'true' && $row['setting_value'] !== '1') {
             closeDBConnection($conn);
             sendResponse(403, false, 'Registration is currently disabled. Please try again later.');
@@ -93,10 +93,10 @@ if (!$conn) {
 // Check if email already exists
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt_params = [$email];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() > 0) {
+if ($result->num_rows > 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(409, false, 'Email already registered');
@@ -106,10 +106,10 @@ $stmt->close();
 // Check if student ID already exists
 $stmt = $conn->prepare("SELECT id FROM users WHERE student_id = ?");
 $stmt_params = [$studentId];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() > 0) {
+if ($result->num_rows > 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(409, false, 'Student ID already registered');

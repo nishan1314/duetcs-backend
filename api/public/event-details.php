@@ -29,18 +29,18 @@ try {
     $stmt = $db->prepare("SELECT * FROM events WHERE id = ?");
     if (!$stmt) throw new Exception("Prepare failed: " . $db->error);
     $stmt_params = [$eventId];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $eventResult = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $eventResult = $stmt->get_result();
     
-    if ($event = $eventResult->fetch(PDO::FETCH_ASSOC)) {
+    if ($event = $eventResult->fetch_assoc()) {
         // Fetch Extended Details (may not exist)
         $details = [];
         $stmtDetails = $db->prepare("SELECT * FROM event_details WHERE event_id = ?");
         if ($stmtDetails) {
             $stmt_params = [$eventId];
             $stmtDetails->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-            $detailsResult = $stmtDetails;
-            $details = $detailsResult->fetch(PDO::FETCH_ASSOC) ?: [];
+            $detailsResult = $stmtDetails->get_result();
+            $details = $detailsResult->fetch_assoc() ?: [];
         }
     
         // Build response with event basic info always available

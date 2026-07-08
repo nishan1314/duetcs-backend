@@ -15,7 +15,7 @@ try {
     
     // Check if table exists
     $result = $db->query("SHOW TABLES LIKE 'system_admin'");
-    $tableExists = $result->rowCount() > 0;
+    $tableExists = $result->num_rows > 0;
     
     $response = [
         'table_exists' => $tableExists,
@@ -29,7 +29,7 @@ try {
             FROM system_admin
         ");
         
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             $response['admins'][] = $row;
         }
         
@@ -43,11 +43,11 @@ try {
         ");
         $email = 'duetcs@duet.ac.bd';
         $stmt_params = [$email];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
-        if ($result->rowCount() > 0) {
-            $response['super_admin'] = $result->fetch(PDO::FETCH_ASSOC);
+        if ($result->num_rows > 0) {
+            $response['super_admin'] = $result->fetch_assoc();
             $response['super_admin_exists'] = true;
         } else {
             $response['super_admin_exists'] = false;

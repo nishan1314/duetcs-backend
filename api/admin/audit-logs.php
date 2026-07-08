@@ -95,10 +95,10 @@ try {
     if (!empty($params)) {
         $stmt = $db->prepare($countSql);
         $stmt->bind_param($types, ...$params);
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $total = $stmt->get_result()->fetch(PDO::FETCH_ASSOC)['total'];
+        $stmt->execute($stmt_params ?? null);
+        $total = $stmt->get_result()->fetch_assoc()['total'];
     } else {
-        $total = $db->query($countSql)->fetch(PDO::FETCH_ASSOC)['total'];
+        $total = $db->query($countSql)->fetch_assoc()['total'];
     }
     
     echo json_encode([

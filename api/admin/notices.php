@@ -100,12 +100,12 @@ function handleGetNotices($db, $adminAuth) {
     if (!empty($params)) {
         $countStmt = $db->prepare($countSql);
         $countStmt->bind_param($types, ...$params);
-        $countStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $totalResult = $countStmt;
+        $countStmt->execute($stmt_params ?? null);
+        $totalResult = $countStmt->get_result();
     } else {
         $totalResult = $db->query($countSql);
     }
-    $totalRow = $totalResult->fetch(PDO::FETCH_ASSOC);
+    $totalRow = $totalResult->fetch_assoc();
     $total = $totalRow['total'];
     
     // Get notices
@@ -143,11 +143,11 @@ function handleGetNotices($db, $adminAuth) {
     if (!empty($params)) {
         $stmt->bind_param($types, ...$params);
     }
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
     $notices = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $notices[] = [
             'id' => $row['id'],
             'title' => $row['title'],
@@ -356,11 +356,11 @@ function handleDeleteNotice($db, $adminAuth) {
     // Get PDF path to delete file
     $stmt = $db->prepare("SELECT pdf_url FROM notices WHERE id = ?");
     $stmt_params = [$noticeId];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() > 0) {
-        $notice = $result->fetch(PDO::FETCH_ASSOC);
+    if ($result->num_rows > 0) {
+        $notice = $result->fetch_assoc();
         
         // Delete the notice
         $deleteStmt = $db->prepare("DELETE FROM notices WHERE id = ?");

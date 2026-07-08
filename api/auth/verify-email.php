@@ -43,16 +43,16 @@ if (!$conn) {
 // Get user by email
 $stmt = $conn->prepare("SELECT id, full_name, email, is_verified FROM users WHERE email = ?");
 $stmt_params = [$email];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(404, false, 'Email not found');
 }
 
-$user = $result->fetch(PDO::FETCH_ASSOC);
+$user = $result->fetch_assoc();
 $stmt->close();
 
 // Check if already verified
@@ -70,16 +70,16 @@ $stmt = $conn->prepare("
     LIMIT 1
 ");
 $stmt_params = [$user['id'], $code];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(400, false, 'Invalid verification code');
 }
 
-$verification = $result->fetch(PDO::FETCH_ASSOC);
+$verification = $result->fetch_assoc();
 $stmt->close();
 
 // Check if already used
@@ -108,7 +108,7 @@ $stmt->close();
 // Mark code as used
 $stmt = $conn->prepare("UPDATE email_verifications SET is_used = TRUE WHERE id = ?");
 $stmt_params = [$verification['id']];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+$stmt->execute($stmt_params ?? null);
 $stmt->close();
 
 closeDBConnection($conn);

@@ -94,10 +94,10 @@ function handleGetPermissions($db) {
         throw new Exception($db->error);
     }
 
-    error_log("Permissions query executed, rows: " . $result->rowCount());
+    error_log("Permissions query executed, rows: " . $result->num_rows);
 
     $permissions = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $permissions[] = [
             'id' => (int)$row['id'],
             'permission_name' => $row['permission_name'],

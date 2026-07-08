@@ -31,7 +31,7 @@ try {
     ");
     
     $wings = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $wings[] = $row;
     }
     

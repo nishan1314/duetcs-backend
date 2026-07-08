@@ -76,18 +76,18 @@ try {
             $countStmt->bind_param($countTypes, ...$countParams);
         }
     }
-    $countStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $countResult = $countStmt;
-    $total = $countResult->fetch(PDO::FETCH_ASSOC)['total'];
+    $countStmt->execute($stmt_params ?? null);
+    $countResult = $countStmt->get_result();
+    $total = $countResult->fetch_assoc()['total'];
     
     // Get events
     $stmt = $db->prepare($query);
     $stmt->bind_param($types, ...$params);
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
     $events = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $events[] = $row;
     }
     

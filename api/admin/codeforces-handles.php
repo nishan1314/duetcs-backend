@@ -63,16 +63,16 @@ function handleGet($db) {
         // Get single handle
         $stmt = $db->prepare("SELECT id, handle, name, created_at, updated_at FROM codeforces_handles WHERE id = ?");
         $stmt_params = [$id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
-        if ($result->rowCount() === 0) {
+        if ($result->num_rows === 0) {
             http_response_code(404);
             echo json_encode(['success' => false, 'message' => 'Handle not found']);
             return;
         }
         
-        $handle = $result->fetch(PDO::FETCH_ASSOC);
+        $handle = $result->fetch_assoc();
         $handle['id'] = (int)$handle['id'];
         
         echo json_encode(['success' => true, 'data' => $handle]);
@@ -97,14 +97,14 @@ function handleGet($db) {
         if (!empty($params)) {
             $stmt = $db->prepare($sql);
             $stmt->bind_param($types, ...$params);
-            $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-            $result = $stmt;
+            $stmt->execute($stmt_params ?? null);
+            $result = $stmt->get_result();
         } else {
             $result = $db->query($sql);
         }
         
         $handles = [];
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             $row['id'] = (int)$row['id'];
             $handles[] = $row;
         }
@@ -135,8 +135,8 @@ function handlePost($db) {
     // Check if handle already exists
     $stmt = $db->prepare("SELECT id FROM codeforces_handles WHERE handle = ?");
     $stmt_params = [$handle];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    if ($stmt->get_result()->rowCount() > 0) {
+    $stmt->execute($stmt_params ?? null);
+    if ($stmt->get_result()->num_rows > 0) {
         http_response_code(409);
         echo json_encode(['success' => false, 'message' => 'Handle already exists']);
         return;
@@ -192,8 +192,8 @@ function handlePut($db) {
     // Check if handle exists
     $stmt = $db->prepare("SELECT * FROM codeforces_handles WHERE id = ?");
     $stmt_params = [$id];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $current = $stmt->get_result()->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute($stmt_params ?? null);
+    $current = $stmt->get_result()->fetch_assoc();
     
     if (!$current) {
         http_response_code(404);
@@ -211,8 +211,8 @@ function handlePut($db) {
         // Check uniqueness
         $stmt = $db->prepare("SELECT id FROM codeforces_handles WHERE handle = ? AND id != ?");
         $stmt_params = [$newHandle, $id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        if ($stmt->get_result()->rowCount() > 0) {
+        $stmt->execute($stmt_params ?? null);
+        if ($stmt->get_result()->num_rows > 0) {
             http_response_code(409);
             echo json_encode(['success' => false, 'message' => 'Handle already exists']);
             return;
@@ -273,16 +273,16 @@ function handleDelete($db) {
     // Check if exists
     $stmt = $db->prepare("SELECT handle FROM codeforces_handles WHERE id = ?");
     $stmt_params = [$id];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() === 0) {
+    if ($result->num_rows === 0) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Handle not found']);
         return;
     }
     
-    $handle = $result->fetch(PDO::FETCH_ASSOC)['handle'];
+    $handle = $result->fetch_assoc()['handle'];
     
     // Delete
     $stmt = $db->prepare("DELETE FROM codeforces_handles WHERE id = ?");

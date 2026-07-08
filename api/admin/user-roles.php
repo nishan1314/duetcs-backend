@@ -94,7 +94,7 @@ function handleGetRoles($db) {
         }
 
         $roles = [];
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             // Parse permissions
             $permissions = [];
             if ($row['permissions']) {
@@ -145,11 +145,11 @@ function handleGetRoles($db) {
             ORDER BY ur.assigned_at DESC
         ");
         $stmt_params = [$userId];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
 
         $roles = [];
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             $roles[] = [
                 'id' => (int)$row['id'],
                 'role_name' => $row['role_name'],
@@ -185,10 +185,10 @@ function handleAssignRole($db) {
     // Check if user already has this role
     $stmt = $db->prepare("SELECT id FROM user_roles WHERE user_id = ? AND role_id = ?");
     $stmt_params = [$userId, $roleId];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
 
-    if ($result->rowCount() > 0) {
+    if ($result->num_rows > 0) {
         $stmt->close();
         http_response_code(400);
         echo json_encode([
@@ -282,9 +282,9 @@ function handleUpdateUserRoles($db) {
         foreach ($data['roles'] as $roleName) {
             $stmt = $db->prepare("SELECT id FROM admin_roles WHERE role_name = ? AND is_active = 1");
             $stmt_params = [$roleName];
-            $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-            $result = $stmt;
-            if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            $stmt->execute($stmt_params ?? null);
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
                 $roleIds[] = $row['id'];
             }
             $stmt->close();
@@ -302,7 +302,7 @@ function handleUpdateUserRoles($db) {
         // Remove all existing roles for this user
         $stmt = $db->prepare("DELETE FROM user_roles WHERE user_id = ?");
         $stmt_params = [$userId];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+        $stmt->execute($stmt_params ?? null);
         $stmt->close();
 
         // Add new roles
@@ -313,7 +313,7 @@ function handleUpdateUserRoles($db) {
                 VALUES (?, ?, ?)
             ");
             $stmt_params = [$userId, $roleId, $assignedBy];
-            $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+            $stmt->execute($stmt_params ?? null);
             $stmt->close();
         }
 

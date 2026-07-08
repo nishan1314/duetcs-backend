@@ -62,11 +62,11 @@ function handleGetContent($db, $adminAuth, $section) {
     
     $stmt = $db->prepare("SELECT content_data, updated_at FROM website_content WHERE section_name = ?");
     $stmt_params = [$section];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() > 0) {
-        $row = $result->fetch(PDO::FETCH_ASSOC);
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
         echo json_encode([
             'success' => true,
             'data' => json_decode($row['content_data'], true),
@@ -134,10 +134,10 @@ function handleUpdateContent($db, $adminAuth, $section) {
         if (!$checkStmt) throw new Exception("Prepare check failed: " . $db->error);
         
         $stmt_params = [$section];
-        $checkStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $checkResult = $checkStmt;
+        $checkStmt->execute($stmt_params ?? null);
+        $checkResult = $checkStmt->get_result();
         
-        if ($checkResult->rowCount() > 0) {
+        if ($checkResult->num_rows > 0) {
             // Update existing
             error_log("Updating existing record");
             $stmt = $db->prepare("UPDATE website_content SET content_data = ?, last_updated_by = ? WHERE section_name = ?");

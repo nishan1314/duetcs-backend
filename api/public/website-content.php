@@ -35,10 +35,10 @@ try {
     error_log("Public API: Fetching section [" . ($section ?? 'null') . "]");
     $stmt = $db->prepare("SELECT * FROM website_content WHERE section_name = ? LIMIT 1");
     $stmt_params = [$section];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() === 0) {
+    if ($result->num_rows === 0) {
         // Return default content if not found
         $defaultContent = getDefaultContent($section);
         http_response_code(200);
@@ -55,7 +55,7 @@ try {
         exit;
     }
     
-    $content = $result->fetch(PDO::FETCH_ASSOC);
+    $content = $result->fetch_assoc();
     error_log("Public API: Found content for [" . $section . "]");
     // Decode JSON content_data
     if (isset($content['content_data'])) {

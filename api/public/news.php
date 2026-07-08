@@ -36,21 +36,21 @@ try {
             LIMIT 1
         ");
         $stmt_params = [$slug];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
-        if ($result->rowCount() === 0) {
+        if ($result->num_rows === 0) {
             http_response_code(404);
             echo json_encode(['success' => false, 'message' => 'Article not found']);
             exit;
         }
         
-        $article = $result->fetch(PDO::FETCH_ASSOC);
+        $article = $result->fetch_assoc();
         
         // Increment view count
         $updateStmt = $db->prepare("UPDATE news SET view_count = view_count + 1 WHERE id = ?");
         $stmt_params = [$article['id']];
-        $updateStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+        $updateStmt->execute($stmt_params ?? null);
         
         http_response_code(200);
         echo json_encode([
@@ -93,18 +93,18 @@ try {
             $countStmt->bind_param($countTypes, ...$countParams);
         }
     }
-    $countStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $countResult = $countStmt;
-    $total = $countResult->fetch(PDO::FETCH_ASSOC)['total'];
+    $countStmt->execute($stmt_params ?? null);
+    $countResult = $countStmt->get_result();
+    $total = $countResult->fetch_assoc()['total'];
     
     // Get news
     $stmt = $db->prepare($query);
     $stmt->bind_param($types, ...$params);
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
     $news = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $news[] = $row;
     }
     

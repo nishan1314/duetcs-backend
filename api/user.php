@@ -39,16 +39,16 @@ $stmt = $conn->prepare("
     WHERE ls.session_token = ? AND ls.expires_at > NOW()
 ");
 $stmt_params = [$sessionToken];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(401, false, 'Invalid or expired session');
 }
 
-$user = $result->fetch(PDO::FETCH_ASSOC);
+$user = $result->fetch_assoc();
 $stmt->close();
 closeDBConnection($conn);
 

@@ -36,10 +36,10 @@ try {
 
         $stmt = $db->prepare("SELECT * FROM event_details WHERE event_id = ?");
         $stmt_params = [$eventId];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
 
-        if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        if ($row = $result->fetch_assoc()) {
             // Decode JSON fields
             $jsonFields = ['chief_guest', 'special_guests', 'other_guests', 'sponsors', 'media_partners', 'winners', 'gallery', 'schedule', 'competition_segments'];
             foreach ($jsonFields as $field) {
@@ -82,10 +82,10 @@ try {
         // Check if exists
         $stmt = $db->prepare("SELECT id FROM event_details WHERE event_id = ?");
         $stmt_params = [$eventId];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
 
-        if ($result->rowCount() > 0) {
+        if ($result->num_rows > 0) {
             // Update
             $sql = "UPDATE event_details SET 
                     about_event = ?, 

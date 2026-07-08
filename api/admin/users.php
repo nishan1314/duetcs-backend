@@ -74,16 +74,16 @@ function handleGet($db) {
             WHERE id = ?
         ");
         $stmt_params = [$id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
-        if ($result->rowCount() === 0) {
+        if ($result->num_rows === 0) {
             http_response_code(404);
             echo json_encode(['success' => false, 'message' => 'User not found']);
             return;
         }
         
-        $user = $result->fetch(PDO::FETCH_ASSOC);
+        $user = $result->fetch_assoc();
         $user['id'] = (int)$user['id'];
         $user['is_active'] = (bool)$user['is_active'];
         $user['is_verified'] = (bool)$user['is_verified'];
@@ -123,10 +123,10 @@ function handleGet($db) {
         if (!empty($params)) {
             $stmt = $db->prepare($countSql);
             $stmt->bind_param($types, ...$params);
-            $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-            $total = $stmt->get_result()->fetch(PDO::FETCH_ASSOC)['total'];
+            $stmt->execute($stmt_params ?? null);
+            $total = $stmt->get_result()->fetch_assoc()['total'];
         } else {
-            $total = $db->query($countSql)->fetch(PDO::FETCH_ASSOC)['total'];
+            $total = $db->query($countSql)->fetch_assoc()['total'];
         }
         
         // Get users with all relevant columns
@@ -142,11 +142,11 @@ function handleGet($db) {
         
         $stmt = $db->prepare($sql);
         $stmt->bind_param($types, ...$params);
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
         $users = [];
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             $row['id'] = (int)$row['id'];
             $row['is_active'] = (bool)$row['is_active'];
             $row['is_verified'] = (bool)$row['is_verified'];
@@ -200,8 +200,8 @@ function handlePost($db) {
     // Check email uniqueness
     $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
     $stmt_params = [$email];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    if ($stmt->get_result()->rowCount() > 0) {
+    $stmt->execute($stmt_params ?? null);
+    if ($stmt->get_result()->num_rows > 0) {
         http_response_code(409);
         echo json_encode(['success' => false, 'message' => 'Email already exists']);
         return;
@@ -211,8 +211,8 @@ function handlePost($db) {
     if ($student_id) {
         $stmt = $db->prepare("SELECT id FROM users WHERE student_id = ?");
         $stmt_params = [$student_id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        if ($stmt->get_result()->rowCount() > 0) {
+        $stmt->execute($stmt_params ?? null);
+        if ($stmt->get_result()->num_rows > 0) {
             http_response_code(409);
             echo json_encode(['success' => false, 'message' => 'Student ID already exists']);
             return;
@@ -272,8 +272,8 @@ function handlePut($db) {
     // Get current user data
     $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
     $stmt_params = [$id];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $currentUser = $stmt->get_result()->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute($stmt_params ?? null);
+    $currentUser = $stmt->get_result()->fetch_assoc();
     
     if (!$currentUser) {
         http_response_code(404);
@@ -338,8 +338,8 @@ function handlePut($db) {
     if (isset($data['email']) && $data['email'] !== $currentUser['email']) {
         $stmt = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
         $stmt_params = [$data['email'], $id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        if ($stmt->get_result()->rowCount() > 0) {
+        $stmt->execute($stmt_params ?? null);
+        if ($stmt->get_result()->num_rows > 0) {
             http_response_code(409);
             echo json_encode(['success' => false, 'message' => 'Email already exists']);
             return;
@@ -386,8 +386,8 @@ function handleDelete($db) {
     // Get user data
     $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
     $stmt_params = [$id];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $user = $stmt->get_result()->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute($stmt_params ?? null);
+    $user = $stmt->get_result()->fetch_assoc();
     
     if (!$user) {
         http_response_code(404);

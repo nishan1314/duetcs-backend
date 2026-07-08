@@ -83,11 +83,11 @@ function handleGetRolePermissions($db) {
         ORDER BY ap.module, ap.permission_name
     ");
     $stmt_params = [$roleId];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
 
     $permissions = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $permissions[] = [
             'id' => (int)$row['id'],
             'permission_name' => $row['permission_name'],
@@ -121,10 +121,10 @@ function handleAddPermissionToRole($db) {
     // Check if already assigned
     $stmt = $db->prepare("SELECT id FROM role_permissions WHERE role_id = ? AND permission_id = ?");
     $stmt_params = [$roleId, $permissionId];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
 
-    if ($result->rowCount() > 0) {
+    if ($result->num_rows > 0) {
         $stmt->close();
         http_response_code(400);
         echo json_encode([
@@ -176,7 +176,7 @@ function handleUpdateRolePermissions($db) {
         // Delete all existing role-permission mappings for this role
         $stmt = $db->prepare("DELETE FROM role_permissions WHERE role_id = ?");
         $stmt_params = [$roleId];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+        $stmt->execute($stmt_params ?? null);
         $stmt->close();
 
         // Add new permissions by key
@@ -185,16 +185,16 @@ function handleUpdateRolePermissions($db) {
                 // Get permission ID by key
                 $stmt = $db->prepare("SELECT id FROM admin_permissions WHERE permission_key = ?");
                 $stmt_params = [$permKey];
-                $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-                $result = $stmt;
+                $stmt->execute($stmt_params ?? null);
+                $result = $stmt->get_result();
 
-                if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                if ($row = $result->fetch_assoc()) {
                     $permId = $row['id'];
 
                     // Insert role-permission mapping
                     $insertStmt = $db->prepare("INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)");
                     $stmt_params = [$roleId, $permId];
-                    $insertStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+                    $insertStmt->execute($stmt_params ?? null);
                     $insertStmt->close();
                 }
                 $stmt->close();

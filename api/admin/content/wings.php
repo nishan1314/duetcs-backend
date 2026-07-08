@@ -53,7 +53,7 @@ function handleGetWings($db, $adminAuth) {
     $result = $db->query("SELECT * FROM wings ORDER BY display_order ASC, wing_name ASC");
     
     $wings = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $wings[] = [
             'id' => $row['id'],
             'name' => $row['wing_name'],

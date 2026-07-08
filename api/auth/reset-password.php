@@ -42,16 +42,16 @@ $stmt = $conn->prepare("
     WHERE pr.reset_token = ?
 ");
 $stmt_params = [$resetToken];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(400, false, 'Invalid or expired reset token');
 }
 
-$resetRecord = $result->fetch(PDO::FETCH_ASSOC);
+$resetRecord = $result->fetch_assoc();
 $stmt->close();
 
 // Check if token is already used
@@ -83,13 +83,13 @@ $stmt->close();
 // Mark token as used
 $stmt = $conn->prepare("UPDATE password_resets SET is_used = TRUE WHERE id = ?");
 $stmt_params = [$resetRecord['id']];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+$stmt->execute($stmt_params ?? null);
 $stmt->close();
 
 // Invalidate all login sessions for security
 $stmt = $conn->prepare("DELETE FROM login_sessions WHERE user_id = ?");
 $stmt_params = [$resetRecord['user_id']];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+$stmt->execute($stmt_params ?? null);
 $stmt->close();
 
 closeDBConnection($conn);

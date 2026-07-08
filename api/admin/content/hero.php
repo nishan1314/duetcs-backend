@@ -46,10 +46,10 @@ function handleGetHeroContent($db, $adminAuth) {
     
     try {
         $stmt = $db->prepare("SELECT content_data FROM website_content WHERE section_name = 'hero'");
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
-        if ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        if ($row = $result->fetch_assoc()) {
             $content = json_decode($row['content_data'], true);
             echo json_encode(['success' => true, 'data' => $content]);
         } else {

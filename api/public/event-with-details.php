@@ -11,7 +11,7 @@ try {
     $query = "SELECT * FROM event_with_details ORDER BY event_date DESC, detail_display_order ASC";
     $result = $db->query($query);
     $data = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $data[] = $row;
     }
     echo json_encode(['success' => true, 'data' => $data]);

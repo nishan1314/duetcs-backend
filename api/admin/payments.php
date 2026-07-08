@@ -102,12 +102,12 @@ function handleGetPayments($db, $adminAuth) {
     if (!empty($params)) {
         $countStmt = $db->prepare($countSql);
         $countStmt->bind_param($types, ...$params);
-        $countStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $totalResult = $countStmt;
+        $countStmt->execute($stmt_params ?? null);
+        $totalResult = $countStmt->get_result();
     } else {
         $totalResult = $db->query($countSql);
     }
-    $totalRow = $totalResult->fetch(PDO::FETCH_ASSOC);
+    $totalRow = $totalResult->fetch_assoc();
     $total = $totalRow['total'];
     
     // Get payments
@@ -144,11 +144,11 @@ function handleGetPayments($db, $adminAuth) {
     if (!empty($params)) {
         $stmt->bind_param($types, ...$params);
     }
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
     $payments = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $payments[] = [
             'id' => $row['id'],
             'transactionId' => $row['transaction_id'],
@@ -401,15 +401,15 @@ function handlePaymentStats($db, $adminAuth) {
     
     // Total payments
     $totalStmt = $db->query("SELECT COUNT(*) as count, SUM(amount) as sum FROM payment_records");
-    $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
+    $totalRow = $totalStmt->fetch_assoc();
     
     // Pending payments
     $pendingStmt = $db->query("SELECT COUNT(*) as count, SUM(amount) as sum FROM payment_records WHERE payment_status = 'pending'");
-    $pendingRow = $pendingStmt->fetch(PDO::FETCH_ASSOC);
+    $pendingRow = $pendingStmt->fetch_assoc();
     
     // Completed payments
     $completedStmt = $db->query("SELECT COUNT(*) as count, SUM(amount) as sum FROM payment_records WHERE payment_status = 'completed'");
-    $completedRow = $completedStmt->fetch(PDO::FETCH_ASSOC);
+    $completedRow = $completedStmt->fetch_assoc();
     
     // By payment type
     $typeStmt = $db->query("
@@ -418,7 +418,7 @@ function handlePaymentStats($db, $adminAuth) {
         GROUP BY payment_type
     ");
     $byType = [];
-    while ($row = $typeStmt->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $typeStmt->fetch_assoc()) {
         $byType[$row['payment_type']] = [
             'count' => $row['count'],
             'sum' => floatval($row['sum'])
@@ -434,7 +434,7 @@ function handlePaymentStats($db, $adminAuth) {
         ORDER BY payment_date DESC
     ");
     $recent = [];
-    while ($row = $recentStmt->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $recentStmt->fetch_assoc()) {
         $recent[] = $row;
     }
     

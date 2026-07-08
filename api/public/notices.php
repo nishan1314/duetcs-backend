@@ -37,7 +37,7 @@ try {
     // Get total count
     $countSql = "SELECT COUNT(*) as total FROM notices WHERE status = 'active'";
     $countResult = $db->query($countSql);
-    $countRow = $countResult->fetch(PDO::FETCH_ASSOC);
+    $countRow = $countResult->fetch_assoc();
     $total = $countRow['total'];
 
     // Get notices
@@ -58,10 +58,10 @@ try {
         throw new Exception('Database execute error: ' . $stmt->error);
     }
 
-    $result = $stmt;
+    $result = $stmt->get_result();
 
     $notices = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $notices[] = [
             'id' => $row['id'],
             'title' => $row['title'],

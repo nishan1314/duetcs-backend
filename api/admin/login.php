@@ -91,10 +91,10 @@ try {
         WHERE email = ?
     ");
     $stmt_params = [$email];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() === 0) {
+    if ($result->num_rows === 0) {
         http_response_code(401);
         echo json_encode([
             'success' => false,
@@ -103,7 +103,7 @@ try {
         exit;
     }
     
-    $user = $result->fetch(PDO::FETCH_ASSOC);
+    $user = $result->fetch_assoc();
     
     // Verify password
     if (!password_verify($password, $user['password'])) {

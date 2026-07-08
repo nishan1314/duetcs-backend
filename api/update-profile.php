@@ -36,16 +36,16 @@ $stmt = $conn->prepare("
     WHERE ls.session_token = ? AND ls.expires_at > NOW()
 ");
 $stmt_params = [$sessionToken];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(401, false, 'Invalid or expired session');
 }
 
-$user = $result->fetch(PDO::FETCH_ASSOC);
+$user = $result->fetch_assoc();
 $userId = $user['id'];
 $stmt->close();
 
@@ -173,7 +173,7 @@ if ($codeforcesHandle !== null) {
         // Delete existing handle if empty string provided
         $stmt = $conn->prepare("DELETE FROM coder_handles WHERE user_id = ?");
         $stmt_params = [$userId];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+        $stmt->execute($stmt_params ?? null);
         $stmt->close();
     } else {
         // Verify the handle exists on Codeforces
@@ -226,10 +226,10 @@ if ($codeforcesHandle !== null) {
         $stmtUser = $conn->prepare("SELECT full_name FROM users WHERE id = ?");
         $stmt_params = [$userId];
         $stmtUser->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $userResult = $stmtUser;
+        $userResult = $stmtUser->get_result();
         $userName = null;
-        if ($userResult->rowCount() > 0) {
-            $userName = $userResult->fetch(PDO::FETCH_ASSOC)['full_name'];
+        if ($userResult->num_rows > 0) {
+            $userName = $userResult->fetch_assoc()['full_name'];
         }
         $stmtUser->close();
         

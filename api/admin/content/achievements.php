@@ -70,14 +70,14 @@ function handleGetAchievements($db, $adminAuth) {
     if (!empty($params)) {
         $stmt = $db->prepare($sql);
         $stmt->bind_param($types, ...$params);
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
     } else {
         $result = $db->query($sql);
     }
     
     $achievements = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $achievements[] = [
             'id' => $row['id'],
             'studentName' => $row['student_name'],

@@ -16,8 +16,8 @@ try {
     
     // Try new table first (codeforces_handles - admin managed)
     $result = $conn->query("SELECT handle FROM codeforces_handles");
-    if ($result && $result->rowCount() > 0) {
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
             $handles[] = $row['handle'];
         }
     }
@@ -25,8 +25,8 @@ try {
     // If no handles in new table, try old table as fallback
     if (empty($handles)) {
         $result = $conn->query("SELECT codeforces_handle FROM coder_handles");
-        if ($result && $result->rowCount() > 0) {
-            while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
                 $handles[] = $row['codeforces_handle'];
             }
         }

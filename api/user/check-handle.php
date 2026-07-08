@@ -46,10 +46,10 @@ $stmt = $conn->prepare("
     WHERE ls.session_token = ? AND ls.expires_at > NOW()
 ");
 $stmt_params = [$sessionToken];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     http_response_code(401);
@@ -57,7 +57,7 @@ if ($result->rowCount() === 0) {
     exit;
 }
 
-$user = $result->fetch(PDO::FETCH_ASSOC);
+$user = $result->fetch_assoc();
 $userId = $user['id'];
 $fullName = $user['full_name'];
 $stmt->close();
@@ -65,12 +65,12 @@ $stmt->close();
 // First, check if user already has a handle in coder_handles
 $stmt = $conn->prepare("SELECT codeforces_handle FROM coder_handles WHERE user_id = ?");
 $stmt_params = [$userId];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$existingResult = $stmt;
+$stmt->execute($stmt_params ?? null);
+$existingResult = $stmt->get_result();
 
-if ($existingResult->rowCount() > 0) {
+if ($existingResult->num_rows > 0) {
     // User already has a handle linked
-    $existingHandle = $existingResult->fetch(PDO::FETCH_ASSOC)['codeforces_handle'];
+    $existingHandle = $existingResult->fetch_assoc()['codeforces_handle'];
     $stmt->close();
     closeDBConnection($conn);
     echo json_encode([
@@ -92,11 +92,11 @@ $stmt = $conn->prepare("
     LIMIT 1
 ");
 $stmt_params = [$fullName];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$matchResult = $stmt;
+$stmt->execute($stmt_params ?? null);
+$matchResult = $stmt->get_result();
 
-if ($matchResult->rowCount() > 0) {
-    $match = $matchResult->fetch(PDO::FETCH_ASSOC);
+if ($matchResult->num_rows > 0) {
+    $match = $matchResult->fetch_assoc();
     $stmt->close();
     closeDBConnection($conn);
     echo json_encode([

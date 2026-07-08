@@ -50,10 +50,10 @@ try {
         WHERE id = ?
     ");
     $stmt_params = [$auth->id()];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() === 0) {
+    if ($result->num_rows === 0) {
         $auth->logout();
         http_response_code(401);
         echo json_encode([
@@ -64,7 +64,7 @@ try {
         exit;
     }
     
-    $admin = $result->fetch(PDO::FETCH_ASSOC);
+    $admin = $result->fetch_assoc();
     $stmt->close();
     
     // Check if still active

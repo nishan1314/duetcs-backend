@@ -21,7 +21,7 @@ $db = Database::getInstance()->getConnection();
 try {
     // Check if table exists
     $tableCheck = $db->query("SHOW TABLES LIKE 'site_settings'");
-    if ($tableCheck->rowCount() === 0) {
+    if ($tableCheck->affected_rows === 0) {
         // Return default settings if table doesn't exist
         echo json_encode([
             'success' => true,
@@ -54,11 +54,11 @@ try {
     $sql = "SELECT setting_key, setting_value, setting_type FROM site_settings WHERE setting_key IN ($placeholders)";
     $stmt = $db->prepare($sql);
     $stmt->bind_param($types, ...$publicKeys);
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
     $settings = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $key = $row['setting_key'];
         $value = $row['setting_value'];
         $type = $row['setting_type'];

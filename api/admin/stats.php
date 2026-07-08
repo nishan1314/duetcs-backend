@@ -73,7 +73,7 @@ function getTotalMembers($db) {
             error_log("Query error: " . $db->error);
             return 0;
         }
-        $row = $result->fetch(PDO::FETCH_ASSOC);
+        $row = $result->fetch_assoc();
         return (int)($row['count'] ?? 0);
     } catch (Exception $e) {
         error_log("Error getting total members: " . $e->getMessage());
@@ -88,7 +88,7 @@ function getTotalExecutives($db) {
             error_log("Query error: " . $db->error);
             return 0;
         }
-        $row = $result->fetch(PDO::FETCH_ASSOC);
+        $row = $result->fetch_assoc();
         return (int)($row['count'] ?? 0);
     } catch (Exception $e) {
         error_log("Error getting total executives: " . $e->getMessage());
@@ -103,7 +103,7 @@ function getTotalEvents($db) {
             error_log("Query error: " . $db->error);
             return 0;
         }
-        $row = $result->fetch(PDO::FETCH_ASSOC);
+        $row = $result->fetch_assoc();
         return (int)($row['count'] ?? 0);
     } catch (Exception $e) {
         error_log("Error getting total events: " . $e->getMessage());
@@ -118,7 +118,7 @@ function getPublishedNotices($db) {
             error_log("Query error: " . $db->error);
             return 0;
         }
-        $row = $result->fetch(PDO::FETCH_ASSOC);
+        $row = $result->fetch_assoc();
         return (int)($row['count'] ?? 0);
     } catch (Exception $e) {
         error_log("Error getting published notices: " . $e->getMessage());

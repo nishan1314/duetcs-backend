@@ -71,16 +71,16 @@ function handleGet($db) {
             WHERE id = ?
         ");
         $stmt_params = [$id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
-        if ($result->rowCount() === 0) {
+        if ($result->num_rows === 0) {
             http_response_code(404);
             echo json_encode(['success' => false, 'message' => 'Admin not found']);
             return;
         }
         
-        $admin = $result->fetch(PDO::FETCH_ASSOC);
+        $admin = $result->fetch_assoc();
         $admin['id'] = (int)$admin['id'];
         $admin['is_active'] = (bool)$admin['is_active'];
         $admin['role'] = Auth::getRole($admin['designation']);
@@ -121,10 +121,10 @@ function handleGet($db) {
         if (!empty($params)) {
             $stmt = $db->prepare($countSql);
             $stmt->bind_param($types, ...$params);
-            $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-            $total = $stmt->get_result()->fetch(PDO::FETCH_ASSOC)['total'];
+            $stmt->execute($stmt_params ?? null);
+            $total = $stmt->get_result()->fetch_assoc()['total'];
         } else {
-            $total = $db->query($countSql)->fetch(PDO::FETCH_ASSOC)['total'];
+            $total = $db->query($countSql)->fetch_assoc()['total'];
         }
         
         // Get admins
@@ -138,11 +138,11 @@ function handleGet($db) {
         
         $stmt = $db->prepare($sql);
         $stmt->bind_param($types, ...$params);
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $result = $stmt;
+        $stmt->execute($stmt_params ?? null);
+        $result = $stmt->get_result();
         
         $admins = [];
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             $row['id'] = (int)$row['id'];
             $row['is_active'] = (bool)$row['is_active'];
             $row['role'] = Auth::getRole($row['designation']);
@@ -188,8 +188,8 @@ function handlePost($db) {
     // Check email uniqueness
     $stmt = $db->prepare("SELECT id FROM system_admin WHERE email = ?");
     $stmt_params = [$data['email']];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    if ($stmt->get_result()->rowCount() > 0) {
+    $stmt->execute($stmt_params ?? null);
+    if ($stmt->get_result()->num_rows > 0) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Email already exists']);
         return;
@@ -260,16 +260,16 @@ function handlePut($db) {
     // Get current admin data
     $stmt = $db->prepare("SELECT id, name, email, designation, is_active FROM system_admin WHERE id = ?");
     $stmt_params = [$id];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() === 0) {
+    if ($result->num_rows === 0) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Admin not found']);
         return;
     }
     
-    $currentAdmin = $result->fetch(PDO::FETCH_ASSOC);
+    $currentAdmin = $result->fetch_assoc();
     $beforeData = $currentAdmin;
     
     // Prevent non-super-admin from editing super admin
@@ -295,8 +295,8 @@ function handlePut($db) {
         // Check email uniqueness
         $stmt = $db->prepare("SELECT id FROM system_admin WHERE email = ? AND id != ?");
         $stmt_params = [$data['email'], $id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        if ($stmt->get_result()->rowCount() > 0) {
+        $stmt->execute($stmt_params ?? null);
+        if ($stmt->get_result()->num_rows > 0) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Email already exists']);
             return;
@@ -399,16 +399,16 @@ function handleDelete($db) {
     // Get admin data
     $stmt = $db->prepare("SELECT id, name, designation FROM system_admin WHERE id = ?");
     $stmt_params = [$id];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() === 0) {
+    if ($result->num_rows === 0) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Admin not found']);
         return;
     }
     
-    $admin = $result->fetch(PDO::FETCH_ASSOC);
+    $admin = $result->fetch_assoc();
     
     // Prevent non-super-admin from deleting super admin
     $adminRole = Auth::getRole($admin['designation']);

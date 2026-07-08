@@ -22,7 +22,7 @@ if ($sessionToken) {
         // Delete session from database
         $stmt = $conn->prepare("DELETE FROM login_sessions WHERE session_token = ?");
         $stmt_params = [$sessionToken];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+        $stmt->execute($stmt_params ?? null);
         $stmt->close();
         closeDBConnection($conn);
     }

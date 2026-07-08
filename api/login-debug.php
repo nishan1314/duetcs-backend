@@ -47,19 +47,19 @@ error_log("Database connected");
 // Get user by email
 $stmt = $conn->prepare("SELECT id, full_name, email, student_id, department, year_semester, password, is_verified FROM users WHERE email = ?");
 $stmt_params = [$email];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-error_log("Query executed, rows: " . $result->rowCount());
+error_log("Query executed, rows: " . $result->num_rows);
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     error_log("User not found");
     sendResponse(401, false, 'Invalid email or password');
 }
 
-$user = $result->fetch(PDO::FETCH_ASSOC);
+$user = $result->fetch_assoc();
 $stmt->close();
 
 error_log("User found: ID=" . $user['id'] . ", Email=" . $user['email'] . ", Verified=" . $user['is_verified']);
@@ -97,7 +97,7 @@ error_log("Session token generated: " . substr($sessionToken, 0, 20) . "...");
 // Create login session
 $stmt = $conn->prepare("INSERT INTO login_sessions (user_id, session_token, ip_address, user_agent, expires_at) VALUES (?, ?, ?, ?, ?)");
 $stmt_params = [$user['id'], $sessionToken, $ipAddress, $userAgent, $expiresAt];
-$executeResult = $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+$executeResult = $stmt->execute($stmt_params ?? null);
 
 error_log("Session insert result: " . ($executeResult ? 'SUCCESS' : 'FAILED'));
 

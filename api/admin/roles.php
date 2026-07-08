@@ -86,10 +86,10 @@ function getAllRolesWithPermissions($db, $adminAuth) {
             throw new Exception("Query error: " . $db->error);
         }
         
-        error_log("Roles query executed, rows: " . $rolesStmt->rowCount());
+        error_log("Roles query executed, rows: " . $rolesStmt->affected_rows);
         
         $roles = [];
-        while ($role = $rolesStmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($role = $rolesStmt->fetch_assoc()) {
             // Get permissions for this role
             $permStmt = $db->prepare("
                 SELECT p.id, p.permission_name, p.permission_key, p.module
@@ -98,20 +98,20 @@ function getAllRolesWithPermissions($db, $adminAuth) {
                 WHERE rp.role_id = ?
             ");
             $stmt_params = [$role['id']];
-            $permStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-            $permResult = $permStmt;
+            $permStmt->execute($stmt_params ?? null);
+            $permResult = $permStmt->get_result();
             
             $permissions = [];
-            while ($perm = $permResult->fetch(PDO::FETCH_ASSOC)) {
+            while ($perm = $permResult->fetch_assoc()) {
                 $permissions[] = $perm;
             }
             
             // Count users with this role
             $countStmt = $db->prepare("SELECT COUNT(*) as count FROM user_roles WHERE role_id = ?");
             $stmt_params = [$role['id']];
-            $countStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-            $countResult = $countStmt;
-            $countRow = $countResult->fetch(PDO::FETCH_ASSOC);
+            $countStmt->execute($stmt_params ?? null);
+            $countResult = $countStmt->get_result();
+            $countRow = $countResult->fetch_assoc();
             
             $roles[] = [
                 'id' => $role['id'],
@@ -284,10 +284,10 @@ function deleteRole($db) {
     // Prevent deletion of system roles
     $stmt = $db->prepare("SELECT role_name FROM admin_roles WHERE id = ?");
     $stmt_params = [$roleId];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() === 0) {
+    if ($result->num_rows === 0) {
         http_response_code(404);
         echo json_encode([
             'success' => false,
@@ -296,7 +296,7 @@ function deleteRole($db) {
         return;
     }
     
-    $role = $result->fetch(PDO::FETCH_ASSOC);
+    $role = $result->fetch_assoc();
     $systemRoles = ['Super Admin', 'Admin', 'Member'];
     
     if (in_array($role['role_name'], $systemRoles)) {
@@ -338,7 +338,7 @@ function handlePermissions($db, $adminAuth, $method) {
     ");
     
     $permissions = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $stmt->fetch_assoc()) {
         $permissions[] = $row;
     }
     
@@ -474,7 +474,7 @@ function handleRolePermissions($db, $adminAuth, $method) {
         // Delete existing permissions
         $stmt = $db->prepare("DELETE FROM role_permissions WHERE role_id = ?");
         $stmt_params = [$roleId];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+        $stmt->execute($stmt_params ?? null);
         
         // Insert new permissions
         if (!empty($permissionIds)) {
@@ -482,7 +482,7 @@ function handleRolePermissions($db, $adminAuth, $method) {
             foreach ($permissionIds as $permId) {
                 $permId = intval($permId);
                 $stmt_params = [$roleId, $permId];
-                $insertStmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+                $insertStmt->execute($stmt_params ?? null);
             }
         }
         

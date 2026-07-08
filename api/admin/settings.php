@@ -62,7 +62,7 @@ function handleGet($db) {
     
     // Check if table exists
     $tableCheck = $db->query("SHOW TABLES LIKE 'site_settings'");
-    if ($tableCheck->rowCount() === 0) {
+    if ($tableCheck->affected_rows === 0) {
         // Table doesn't exist, return empty settings
         echo json_encode([
             'success' => true,
@@ -80,7 +80,7 @@ function handleGet($db) {
     }
     
     $settings = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $key = $row['setting_key'];
         $value = $row['setting_value'];
         $type = $row['setting_type'];

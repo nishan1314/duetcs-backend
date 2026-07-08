@@ -1,10 +1,9 @@
 <?php
 // Database configuration
-define('DB_HOST', 'db.mnvmqcnrgyldrmzswego.supabase.co');
-define('DB_PORT', '5432');
-define('DB_USER', 'postgres');
-define('DB_PASS', 'duetcsadmin@@@');
-define('DB_NAME', 'postgres');
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'duetcs_db');
 
 // Database Singleton Class
 class Database {
@@ -12,17 +11,15 @@ class Database {
     private $connection = null;
     
     private function __construct() {
-        try {
-            $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
-            $this->connection = new PDO($dsn, DB_USER, DB_PASS);
-            
-            // Set error mode to exception
-            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-        } catch (PDOException $e) {
-            error_log("Database Error: " . $e->getMessage());
-            throw $e;
+        $this->connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+        
+        if ($this->connection->connect_error) {
+            error_log("Database Connection Failed: " . $this->connection->connect_error);
+            die("Database Connection Failed: " . $this->connection->connect_error);
         }
+        
+        // Set charset to utf8mb4
+        $this->connection->set_charset("utf8mb4");
     }
     
     public static function getInstance() {

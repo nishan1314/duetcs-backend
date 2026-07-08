@@ -70,7 +70,7 @@ function handleGetSystemAdmins($db, $adminAuth) {
     $result = $db->query($query);
     $admins = [];
     
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $admins[] = $row;
     }
     
@@ -129,10 +129,10 @@ function handleCreateSystemAdmin($db, $adminAuth) {
     // Check if email already exists
     $stmt = $db->prepare("SELECT id FROM system_admin WHERE email = ?");
     $stmt_params = [$email];
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt;
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result();
     
-    if ($result->rowCount() > 0) {
+    if ($result->num_rows > 0) {
         http_response_code(400);
         echo json_encode([
             'success' => false,
@@ -282,14 +282,14 @@ function handleDeleteSystemAdmin($db, $adminAuth) {
     
     // Prevent deleting the last super admin
     $stmt = $db->prepare("SELECT COUNT(*) as count FROM system_admin WHERE designation = 'Super Admin'");
-    $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-    $result = $stmt->get_result()->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute($stmt_params ?? null);
+    $result = $stmt->get_result()->fetch_assoc();
     
     if ($result['count'] <= 1) {
         $stmt = $db->prepare("SELECT designation FROM system_admin WHERE id = ?");
         $stmt_params = [$id];
-        $stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-        $admin = $stmt->get_result()->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute($stmt_params ?? null);
+        $admin = $stmt->get_result()->fetch_assoc();
         
         if ($admin && $admin['designation'] === 'Super Admin') {
             http_response_code(400);

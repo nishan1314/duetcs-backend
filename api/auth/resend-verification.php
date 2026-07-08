@@ -33,16 +33,16 @@ if (!$conn) {
 // Check if user exists
 $stmt = $conn->prepare("SELECT id, full_name, email, is_verified FROM users WHERE email = ?");
 $stmt_params = [$email];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() === 0) {
+if ($result->num_rows === 0) {
     $stmt->close();
     closeDBConnection($conn);
     sendResponse(404, false, 'Email not found');
 }
 
-$user = $result->fetch(PDO::FETCH_ASSOC);
+$user = $result->fetch_assoc();
 $stmt->close();
 
 // Check if already verified
@@ -60,11 +60,11 @@ $stmt = $conn->prepare("
     LIMIT 1
 ");
 $stmt_params = [$user['id']];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
-$result = $stmt;
+$stmt->execute($stmt_params ?? null);
+$result = $stmt->get_result();
 
-if ($result->rowCount() > 0) {
-    $lastEmail = $result->fetch(PDO::FETCH_ASSOC);
+if ($result->num_rows > 0) {
+    $lastEmail = $result->fetch_assoc();
     $lastSent = strtotime($lastEmail['created_at']);
     $now = time();
     $minutesAgo = ($now - $lastSent) / 60;
@@ -81,7 +81,7 @@ $stmt->close();
 // Invalidate old codes (mark as used)
 $stmt = $conn->prepare("UPDATE email_verifications SET is_used = TRUE WHERE user_id = ? AND is_used = FALSE");
 $stmt_params = [$user['id']];
-$stmt->execute(isset($stmt_params) ? $stmt_params : null); if(isset($stmt_params)) unset($stmt_params);
+$stmt->execute($stmt_params ?? null);
 $stmt->close();
 
 // Generate new 6-digit verification code with 15-minute expiry
